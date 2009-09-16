@@ -6,7 +6,6 @@ class ComputeNodeTransportProtocol(protocol.Protocol):
     DELIMITER = ';;end;;'
     def connectionMade(self):
         print "Connection Made"
-        self.factory.addServer(self.transport.getPeer())
         self.buf = []
         
     def dataReceived(self, data):
