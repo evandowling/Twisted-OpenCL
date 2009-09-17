@@ -1,7 +1,13 @@
 
 class ResourceAllocator(object):
-    def __init__(self):
-        self.active_simulations = {}
+    def __init__(self, simulation_manager):
+        self.simulation_manager = simulation_manager
+        self.pending_simulations = {}
+        
+    def notifyServerDown(self,servers,server_id):
+        """
+        Perform the necessary actions to recover from a network failure
+        """
         
     def setTransform(self,transform_packet):
         """ 
@@ -17,3 +23,8 @@ class ResourceAllocator(object):
         """
         Signal the system to begin the simulation as soon as the requisite resources are acquired
         """
+        if self.pending_simulations[simulation_id]:
+            self.simulation_manager.queueSimulation(self.pending_simulations[simulation_id])
+            del self.pending_simulations[simulation_id]
+        
+        

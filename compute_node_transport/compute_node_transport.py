@@ -71,16 +71,36 @@ class ComputeNodeTransportClient(protocol.Protocol):
     def dataReceived(self, data):
         print data
 
+    def parseBuffer(self):
+        """ 
+        Chomp off complete packets one at a time communicate their contents through the factory to the compute core.
+        """    
+        while idx > -1:
+                packet = self.buf[0:idx]
+                if len(packet) > 4:
+                    if packet[0:3] == 'DATA':
+                        self.factory.setData(packet[4:idx])                 
+                    else:
+                        print "%s is a malformed packet, header %s not recognized" % (packet, packet[0:3])
+                else:
+                    print "%s attempting to send a packet of invalid length %s" % (packet, len(packet))
+                self.buf = self.buf[(idx + len(DELIMITER)):]
+                idx = self.buf.find(DELIMITER)
     def connectionLost(self, reason):
         print "Connection Closed"
 
 class ComputeNodeTransportClientFactory(protocol.ClientFactory):
 
-    protocol = ComputeNodeManagementClient
-
+    protocol = ComputeNodeTransportClient
+    def __init__(self,simulation_manager):
+        """
+        Set up the initial data pathways
+        """
+        self.simulation_manager = simulation_manager
+        
     def clientConnectionFailed(self, _, reason):
         pass
 
-    def gotData(self, data):
-        print data
-    
+    def setData(self, data):
+        self.simulation_manager.sendData(data)
+        
