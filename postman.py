@@ -7,8 +7,12 @@ class Postman(object):
     def __init__(self):
         self.resource_allocator = ResourceAllocator(self)
         self.compute_node_management_factory = ComputeNodeManagementFactory(self)
-        self.simulation_transport = ComputeNodeTransportClientFactory(self)
+        self.compute_node_transport_factory = ComputeNodeTransportFactory(self)
         self.simulations = {}
+        
+    def start_services(self,transport_port,management_port):
+        reactor.listenTCP(transport_port, self.compute_node_transport_factory)
+        reactor.listenTCP(management_port, self.compute_node_management_factory)
         
     def sendData(self,data):
         """
@@ -36,4 +40,5 @@ class Postman(object):
             
 if __name__ == '__main__':
     p = Postman()
+    p.start_services(5333,6666)
     reactor.run()
